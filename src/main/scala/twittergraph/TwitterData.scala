@@ -46,6 +46,25 @@ object TwitterData extends TwitterInstance {
     updateUsers(followingIds)
   }
 
+  def getNamesFromIds(userIds: Set[Long]): Map[Long,String] = {
+    userIds.map(id => (id, getNameFromId(id))).toMap
+  }
+
+  def getNameFromId(userId: Long): String = {
+    TwitterSchema.UsersTable.query2.withKey(userId)
+      .withColumns(_.name)
+      .singleOption() match 
+    {
+      case Some(pageRow) => {
+        pageRow.column(_.name).getOrElse("Unknown")
+      }
+      case None => { // No info about user. Update their info.
+        getFollowing(userId) 
+        getNameFromId(userId)
+      }
+    }
+  }
+
   def updateUsers(userIds: Set[Long]): Set[Long] = {
     userIds.grouped(100).foreach { userGroup =>
       val users = twitter.lookupUsers(userGroup.toArray).asScala

@@ -19,7 +19,7 @@ import org.apache.hadoop.util._
 object TwitterGraph {
   val inputFile = "twittergraph_in.txt"
   
-  def writeInputFile(userId: Long) = {
+  def writeInputFile(userId: Long): Set[Long] = {
     val following = TwitterData.getFollowing(userId)
     val filePath = new Path(inputFile)
 
@@ -27,15 +27,28 @@ object TwitterGraph {
     val writer = new BufferedWriter(new OutputStreamWriter(fs.create(filePath)))
     following.foreach { user => writer.write(user.toString + "\n") }
     writer.close
+    following
   }
 }
 
 class TwitterGraph(args: Args) extends Job(args) {
   val userId = args("id").toLong
-  TwitterGraph.writeInputFile(userId);
+  val following = TwitterGraph.writeInputFile(userId)
   val input = TextLine(TwitterGraph.inputFile)
   val output = TextLine("out")
+  val names = TwitterData.getNamesFromIds(following)
 
-  input.read.write(output)
+  input.read
+  .mapTo('line -> 'userId) { line : String => line.toLong }
+  .flatMap('userId -> ('toUserId, 'count)) { userId : Long =>
+    TwitterData.getMentions(userId).toList
+  }
+  .filter('toUserId) { toUserId : Long => following contains toUserId }
+  .mapTo(('userId,'toUserId,'count) -> ('username,'toUsername,'count)) { 
+    tuple : (Long, Long, Int) =>
+    val (userId, toUserId, count) = tuple
+    (names(userId), names(toUserId), count)
+  }
+  .write(output)
 }
 
