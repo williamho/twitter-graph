@@ -18,12 +18,12 @@ import org.apache.hadoop.util._
 
 object TwitterGraph {
   val inputFile = "twittergraph_in.txt"
+  val fs = FileSystem.get(new Configuration())
   
   def writeInputFile(userId: Long): Set[Long] = {
     val following = TwitterData.getFollowing(userId)
     val filePath = new Path(inputFile)
 
-    val fs = FileSystem.get(new Configuration())
     val writer = new BufferedWriter(new OutputStreamWriter(fs.create(filePath)))
     following.foreach { user => writer.write(user.toString + "\n") }
     writer.close
@@ -35,8 +35,8 @@ class TwitterGraph(args: Args) extends Job(args) {
   val userId = args("id").toLong
   val following = TwitterGraph.writeInputFile(userId)
   val input = TextLine(TwitterGraph.inputFile)
-  val output = TextLine("out")
-  val names = TwitterData.getNamesFromIds(following)
+  val output = TextLine(args("output"))
+  val info = TwitterData.getInfoFromIds(following)
 
   input.read
   .mapTo('line -> 'userId) { line : String => line.toLong }
@@ -47,7 +47,7 @@ class TwitterGraph(args: Args) extends Job(args) {
   .mapTo(('userId,'toUserId,'count) -> ('username,'toUsername,'count)) { 
     tuple : (Long, Long, Int) =>
     val (userId, toUserId, count) = tuple
-    (names(userId), names(toUserId), count)
+    (info(userId)._1, info(toUserId)._1, count)
   }
   .write(output)
 }
