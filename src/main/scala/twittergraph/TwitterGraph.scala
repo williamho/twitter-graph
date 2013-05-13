@@ -76,7 +76,7 @@ class TwitterGraph(args: Args) extends Job(args) {
 
   val username = args("user").toLowerCase
   val xml = XML.load(apiRoute + "?screen_name=" + username) 
-  val userId = (xml \\ "user" \\ "id").text.toLong
+  val userId = (xml \ "id").text.toLong
 
   val following = TwitterGraph.writeInputFile(userId)
   val input = TextLine(TwitterGraph.inputFile)

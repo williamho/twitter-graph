@@ -38,7 +38,13 @@ class GetData extends HttpServlet {
         out flush
       }
 
-      TwitterGraph.getMerge(hdfsOutDir,localJobOutput)
+      new ProcessBuilder(
+        "hadoop", "fs",
+        "-getmerge",
+        hdfsOutDir,
+        localJobOutput
+      ).start.waitFor
+
       val json = TwitterGraph.jsonFromFile(localJobOutput)
       TwitterGraph.writeOutputFile(pathToJson, json)
 
