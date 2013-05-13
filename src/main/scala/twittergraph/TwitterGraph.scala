@@ -1,6 +1,5 @@
 package twittergraph
 
-import com.gravity.hbase.mapreduce._
 import java.lang.String
 import org.scala_tools.time.Imports._
 import com.gravity.hbase.schema._
@@ -20,7 +19,9 @@ import org.apache.hadoop.util._
 
 object TwitterGraph {
   val inputFile = "twittergraph_in.txt"
-  val fs = FileSystem.get(new Configuration())
+  val conf = new Configuration()
+  val fs = FileSystem.get(conf)
+  val localFs = FileSystem.getLocal(conf)
   
   def writeInputFile(userId: Long): Set[Long] = {
     val following = TwitterData.getFollowing(userId)
@@ -47,17 +48,39 @@ object TwitterGraph {
 
     "{ \"users\": {\n%s\n}, \n\"links\": [\n%s\n]\n }".format(usersString, linksString)
   }
+
+  def writeOutputFile(localFile: String, contents: String) = {
+    val filePath = new Path(localFile)
+    val writer = new BufferedWriter(new OutputStreamWriter(localFs.create(filePath)))
+    writer.write(contents)
+    writer.close
+  }
+
+  def deleteHdfsFile(hdfsFile: String) = {
+    val hdfsPath = new Path(hdfsFile)
+    if (fs exists hdfsPath)
+      fs.delete(hdfsPath, true)
+  }
+
+  def getMerge(hdfsDir: String, localFile: String) = {
+    val hdfsPath = new Path(hdfsDir)
+    val localPath = new Path(localFile)
+    if (localFs exists localPath)
+      localFs.delete(localPath, false)
+    FileUtil.copyMerge(fs, hdfsPath, localFs, localPath, true, conf, "");
+  }
 }
 
 class TwitterGraph(args: Args) extends Job(args) {
-  val userId = args.getOrElse("id", {
-    val apiRoute = "https://api.twitter.com/1/users/show.xml?screen_name="
-    (XML.load(apiRoute + args("user")) \\ "user" \\ "id").text
-  }).toLong
+  val apiRoute = "https://api.twitter.com/1/users/show.xml"
+
+  val username = args("user").toLowerCase
+  val xml = XML.load(apiRoute + "?screen_name=" + username) 
+  val userId = (xml \\ "user" \\ "id").text.toLong
+
   val following = TwitterGraph.writeInputFile(userId)
   val input = TextLine(TwitterGraph.inputFile)
   val output = TextLine(args("output"))
-  //val info = TwitterData.getInfoFromIds(following)
 
   input.read
   .mapTo('line -> 'userId) { line : String => line.toLong }
@@ -65,13 +88,15 @@ class TwitterGraph(args: Args) extends Job(args) {
     TwitterData.getMentions(userId).toList
   }
   .filter('toUserId) { toUserId : Long => following contains toUserId }
-  /*
-  .mapTo(('userId,'toUserId,'count) -> ('username,'toUsername,'count)) { 
-    tuple : (Long, Long, Int) =>
-    val (userId, toUserId, count) = tuple
-    (info(userId)._1, info(toUserId)._1, count)
-  }
-  */
   .write(output)
+
+/*
+  val localJobOutput = "/tmp/twittergraph-" + username
+  TwitterGraph.getMerge(args("output"),localJobOutput)
+  TwitterGraph.writeOutputFile(
+    "output/" + username + ".json",
+    TwitterGraph.jsonFromFile(localJobOutput)
+  )
+  */
 }
 

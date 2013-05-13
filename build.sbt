@@ -39,6 +39,8 @@ libraryDependencies ++= Seq(
   "javax.servlet" % "servlet-api" % "2.5" % "provided"
 )
 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
+
 seq(assemblySettings: _*)
 
 seq(webSettings: _*)

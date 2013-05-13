@@ -20,7 +20,8 @@ $.getJSON('get', function(data) {
 	}
 
 	data.links.forEach(function(obj, index) {
-		graph.addLink(obj.from, obj.to).mentions = obj.weight;
+		if (obj.weight > 25) 
+			graph.addLink(obj.from, obj.to).mentions = obj.weight;
 	});
 
 var maxMentions = 0;
