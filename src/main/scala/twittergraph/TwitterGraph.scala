@@ -7,6 +7,7 @@ import com.gravity.hbase.schema._
 import scala.collection._
 import org.apache.hadoop.io.Text
 import org.apache.hadoop.hbase.HBaseConfiguration
+import scala.io._
 
 import com.twitter.scalding._
 
@@ -29,6 +30,22 @@ object TwitterGraph {
     writer.close
     following
   }
+
+  def jsonFromFile(filename: String): String = {
+    val data = Source.fromFile(filename).getLines.map(_.split("\t").map(_.toLong)).toSeq
+
+    val userIds = data.flatMap(_.init).toSet
+    val info = TwitterData.getInfoFromIds(userIds)
+    val usersString = info.map(ls =>
+      "\"%d\": { \"name\": \"%s\", \"icon\": \"%s\" }".format(ls._1, ls._2._1, ls._2._2)
+    ).mkString(",\n")
+
+    val linksString = data.map(ls => 
+        "{ \"from\": \"%d\", \"to\": \"%d\", \"weight\": \"%d\"}".format(ls(0), ls(1), ls(2))
+    ).mkString(",\n")
+
+    "{ \"users\": {%s}, \"links\": [%s] }".format(usersString, linksString)
+  }
 }
 
 class TwitterGraph(args: Args) extends Job(args) {
@@ -36,7 +53,7 @@ class TwitterGraph(args: Args) extends Job(args) {
   val following = TwitterGraph.writeInputFile(userId)
   val input = TextLine(TwitterGraph.inputFile)
   val output = TextLine(args("output"))
-  val info = TwitterData.getInfoFromIds(following)
+  //val info = TwitterData.getInfoFromIds(following)
 
   input.read
   .mapTo('line -> 'userId) { line : String => line.toLong }
@@ -44,11 +61,13 @@ class TwitterGraph(args: Args) extends Job(args) {
     TwitterData.getMentions(userId).toList
   }
   .filter('toUserId) { toUserId : Long => following contains toUserId }
+  /*
   .mapTo(('userId,'toUserId,'count) -> ('username,'toUsername,'count)) { 
     tuple : (Long, Long, Int) =>
     val (userId, toUserId, count) = tuple
     (info(userId)._1, info(toUserId)._1, count)
   }
+  */
   .write(output)
 }
 
