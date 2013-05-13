@@ -3,6 +3,7 @@
 *.swp
 *.swo
 .*.crc
+.__afs*
 
 # sbt specific
 dist/*

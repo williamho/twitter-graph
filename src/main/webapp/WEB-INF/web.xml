@@ -13,4 +13,14 @@
     <servlet-name>GetData</servlet-name>
     <url-pattern>/get/*</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>GetJSON</servlet-name>
+    <servlet-class>twittergraph.http.GetJSON</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetJSON</servlet-name>
+    <url-pattern>/json/*</url-pattern>
+  </servlet-mapping>
+
 </web-app>

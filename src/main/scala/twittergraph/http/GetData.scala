@@ -14,7 +14,7 @@ class GetData extends HttpServlet {
   
   override def doGet(req : HSReq, resp : HSResp) = {
     resp.setContentType("application/json")
-    val out = resp.getWriter()
+    val out = resp.getWriter
 
     val username = Option(req getParameter "user").getOrElse("default").toLowerCase
 
