@@ -1,60 +1,49 @@
 import AssemblyKeys._
 
-name := "hbase-scalding"
+name := "twitter-graph"
 
-organization := "Nanyang Polytechnic"
+organization := "w"
 
 version := "1.0.0"
 
 scalaVersion := "2.9.2"
 
-
-resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases"
-
-resolvers += "Concurrent Maven Repo" at "http://conjars.org/repo"
-  
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
-  
-resolvers += "Twitter Maven Repo" at "http://maven.twttr.com"
-
-resolvers += "Maven Repository" at "http://mvnrepository.com/artifact/"
-
-resolvers += ("releases" at "http://oss.sonatype.org/content/repositories/releases")
-
-resolvers += ("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots")
-
-resolvers += "Sonatype OSS Repo" at "https://oss.sonatype.org/content/groups/scala-tools"
-
 mainClass := Some("com.twitter.scalding.Tool")
 
-  libraryDependencies+= "org.specs2" %% "specs2" % "1.11" % "test"
+resolvers ++= Seq(
+  "Apache HBase" at "https://repository.apache.org/content/repositories/releases",
+  "Concurrent Maven Repo" at "http://conjars.org/repo",
+  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+  "Twitter Maven Repo" at "http://maven.twttr.com",
+  "Maven Repository" at "http://mvnrepository.com/artifact/",
+  "releases" at "http://oss.sonatype.org/content/repositories/releases",
+  "snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
+  "Sonatype OSS Repo" at "https://oss.sonatype.org/content/groups/scala-tools"
+)
 
-  libraryDependencies += "cascading" % "cascading-core" % "2.0.7"
+libraryDependencies ++= Seq(
+  "org.specs2" %% "specs2" % "1.11" % "test",
+  "cascading" % "cascading-core" % "2.0.7",
+  "cascading" % "cascading-local" % "2.0.7",
+  "cascading" % "cascading-hadoop" % "2.0.7",
+  "com.twitter" % "maple" % "0.2.5",
+  "com.twitter" %% "scalding" % "0.8.2",
+  "commons-lang" % "commons-lang" % "2.4",
+  "io.netty" % "netty" % "[3.4.6.Final]",
+  "org.apache.hbase" % "hbase" % "0.94.3",
+  "com.gravity" % "gravity-hpaste" % "0.1.11",
+  "org.scalaj" %% "scalaj-time" % "0.6",
+  "org.twitter4j" % "twitter4j-core" % "3.0.3",
+  "org.eclipse.jetty" % "jetty-webapp" % "7.3.0.v20110203" % "container",
+  "org.eclipse.jetty" % "jetty-plus" % "7.3.0.v20110203" % "container",
+  "javax.servlet" % "servlet-api" % "2.5" % "provided"
+)
 
-  libraryDependencies += "cascading" % "cascading-local" % "2.0.7"
+seq(assemblySettings: _*)
 
-  libraryDependencies += "cascading" % "cascading-hadoop" % "2.0.7"
+seq(webSettings: _*)
 
-  libraryDependencies += "com.twitter" % "maple" % "0.2.5"
-
-  libraryDependencies += "com.twitter" %% "scalding" % "0.8.2"
-
-  libraryDependencies += "commons-lang" % "commons-lang" % "2.4"
-
-  libraryDependencies += "io.netty" % "netty" % "[3.4.6.Final]"
-
-  libraryDependencies += "org.apache.hbase" % "hbase" % "0.94.3"
-
-  libraryDependencies += "com.gravity" % "gravity-hpaste" % "0.1.11"
-
-  libraryDependencies += "org.scalaj" %% "scalaj-time" % "0.6"
-
-  libraryDependencies += "org.twitter4j" % "twitter4j-core" % "3.0.3"
-
-  parallelExecution in Test := false
-
-  seq(assemblySettings: _*)
-
+port in container.Configuration := 8080
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
