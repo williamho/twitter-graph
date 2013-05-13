@@ -8,6 +8,7 @@ import scala.collection._
 import org.apache.hadoop.io.Text
 import org.apache.hadoop.hbase.HBaseConfiguration
 import scala.io._
+import scala.xml.XML
 
 import com.twitter.scalding._
 
@@ -44,12 +45,15 @@ object TwitterGraph {
         "{ \"from\": \"%d\", \"to\": \"%d\", \"weight\": \"%d\"}".format(ls(0), ls(1), ls(2))
     ).mkString(",\n")
 
-    "{ \"users\": {%s}, \"links\": [%s] }".format(usersString, linksString)
+    "{ \"users\": {\n%s\n}, \n\"links\": [\n%s\n]\n }".format(usersString, linksString)
   }
 }
 
 class TwitterGraph(args: Args) extends Job(args) {
-  val userId = args("id").toLong
+  val userId = args.getOrElse("id", {
+    val apiRoute = "https://api.twitter.com/1/users/show.xml?screen_name="
+    (XML.load(apiRoute + args("user")) \\ "user" \\ "id").text
+  }).toLong
   val following = TwitterGraph.writeInputFile(userId)
   val input = TextLine(TwitterGraph.inputFile)
   val output = TextLine(args("output"))
