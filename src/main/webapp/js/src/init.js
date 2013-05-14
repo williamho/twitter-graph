@@ -96,7 +96,10 @@ define(["viva","config","options"], function(Viva,config,options) {
 				linkUI.attr('d', 'M0,0');
 		});
 
-		var renderer = Viva.Graph.View.renderer(graph, { graphics : graphics });
+		var renderer = Viva.Graph.View.renderer(graph, { 
+			container: document.getElementById('content'),
+			graphics: graphics 
+		});
 		renderer.run();
 		options.filterByMentions(config.minMentions);
 	}

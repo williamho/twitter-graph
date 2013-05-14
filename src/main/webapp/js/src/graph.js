@@ -1,4 +1,4 @@
-define(["jquery","viva","bbq","config","init","options"], function($,Viva,bbq,config,init,options) {
+define(["jquery","ui","viva","bbq","config","init","options"], function($,ui,Viva,bbq,config,init,options) {
 	var graph = config.graph;
 	var graphics = config.graphics;
 
@@ -10,6 +10,30 @@ define(["jquery","viva","bbq","config","init","options"], function($,Viva,bbq,co
 	}
 
 	$(function(){
+		$("#menu").draggable().resizable();
+		var slider = $("#mentions-slider").slider({
+			min: 0,
+			max: 100,
+			value: config.minMentions,
+			range: "min",
+			slide: function(event, ui) {
+				$("#mentions").text(ui.value);
+				window.location = $.param.fragment(window.location.href, {mentions: ui.value});
+			}
+		});
+		var slider = $("#opacity-slider").slider({
+			min: 0,
+			max: 1,
+			value: config.minOpacity,
+			step: 0.05,
+			range: "min",
+			slide: function(event, ui) {
+				$("#opacity").text(ui.value);
+				window.location = $.param.fragment(window.location.href, {opacity: ui.value});
+			}
+		});
+
+		var query = $.deparam.querystring();
 		$(window).bind("hashchange", function(e) {
 			var params = $.deparam.fragment();
 
@@ -30,14 +54,15 @@ define(["jquery","viva","bbq","config","init","options"], function($,Viva,bbq,co
 				options.changeOpacity(parseFloat(params.opacity));
 
 			// Switch user
-			if (params.hasOwnProperty("user")) {
-				if (params.user.toLowerCase() != config.currentUser) 
-					loadUser(params.user);
+			if (query.hasOwnProperty("user")) {
+				if (query.user.toLowerCase() != config.currentUser) 
+					loadUser(query.user);
 			}
-			else 
+			else if (config.currentUser != config.defaultUser)
 				loadUser(config.defaultUser);
 		});
 
+		$.hashchangeDelay = 1000;
 		$(window).trigger("hashchange");
 	});
 });
