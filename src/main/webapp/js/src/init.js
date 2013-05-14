@@ -2,31 +2,11 @@ define(["viva","config","options"], function(Viva,config,options) {
 	var graph = config.graph;
 	var graphics = config.graphics;
 
-	var showLinked = function(node, isOn) {
-		if (!node.ui.enabled)
-			return;
-		var opacity = isOn ? 1.0 : config.minOpacity;
-
-		if (node != config.currentNode)
-			node.ui.attr('opacity', opacity)
-		graph.forEachLinkedNode(node.id, function(linkedNode, link){
-			if (!link.ui.enabled || linkedNode.ui === node.ui)
-				return;
-			var incomingMultiplier = (link.fromId !== node.id) ? config.incomingMultiplier : 1;
-				
-			link && link.ui && link.ui.attr('opacity', incomingMultiplier*opacity);
-			if (linkedNode.ui.enabled && linkedNode != config.currentNode)
-				linkedNode.ui.attr('opacity', incomingMultiplier*opacity)
-		});
-	};
-
 	return function(data) {
 		graph.clear();
 		graph.beginUpdate();
-		graph.users = {};
 		for (var id in data.users) {
 			graph.addNode(id, data.users[id]);
-			graph.users[data.users[id].name.toLowerCase()] = id; // Map usernames to IDs
 		}
 
 		data.links.forEach(function(obj, index) {
@@ -50,14 +30,14 @@ define(["viva","config","options"], function(Viva,config,options) {
 				text.attr('font-weight','bold');
 				ui.attr('opacity', 1);
 			}
-
+			node.isSelected = false;
 			ui.append(text);
 			ui.append(image);
 			ui.enabled = true;
 
 			$(image).hover(
-				function() { showLinked(node, true); }, // mouseover
-				function() { showLinked(node, false); } // mouseout
+				function() { options.showLinked(node, true); }, // mouseover
+				function() { options.showLinked(node, false); } // mouseout
 			);
 			return ui;
 		}).placeNode(function(nodeUI, pos) {

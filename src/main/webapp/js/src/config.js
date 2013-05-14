@@ -17,6 +17,7 @@ define(["viva"], function(Viva) {
 		minOpacity: 0.3,
 		incomingMultiplier: 0.6,
 		prune: false,
+		paused: false,
 
 		graph: graph,
 		graphics: graphics,

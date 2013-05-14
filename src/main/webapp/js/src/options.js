@@ -7,6 +7,25 @@ define(["jquery","bbq","config"], function($,bbq,config) {
 	}
 
 	return {
+		showLinked: function(node, isOn) {
+			if (!node.ui.enabled)
+				return;
+			var opacity = isOn ? 1.0 : config.minOpacity;
+
+			node.isSelected = isOn;
+			if (node != config.currentNode)
+				node.ui.attr('opacity', opacity)
+			graph.forEachLinkedNode(node.id, function(linkedNode, link){
+				if (!link.ui.enabled || linkedNode.isSelected || linkedNode.ui === node.ui)
+					return;
+				var incomingMultiplier = (link.fromId !== node.id) ? config.incomingMultiplier : 1;
+					
+				link && link.ui && link.ui.attr('opacity', incomingMultiplier*opacity);
+				if (linkedNode.ui.enabled && linkedNode != config.currentNode)
+					linkedNode.ui.attr('opacity', incomingMultiplier*opacity)
+			});
+		},
+
 		changeOpacity: function(opacity) {
 			graph.beginUpdate();
 			config.minOpacity = opacity;

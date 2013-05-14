@@ -2,8 +2,21 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 	var graph = config.graph;
 	var graphics = config.graphics;
 
+	var pause = function(bool) {
+		if (config.paused)
+			config.renderer.pause();
+		else
+			config.renderer.resume();
+	}
+
 	$("#menu").draggable().resizable();
-	var slider = $("#mentions-slider").slider({
+	$(document).mouseup(function() {
+		pause(config.paused);
+	});
+	$("#pause").change(function() {
+		pause(config.paused = this.checked);
+	});
+	$("#mentions-slider").slider({
 		min: 0,
 		max: 100,
 		value: config.minMentions,
@@ -12,7 +25,7 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 			options.filterByMentions(ui.value);
 		}
 	});
-	var slider = $("#opacity-slider").slider({
+	$("#opacity-slider").slider({
 		min: 0,
 		max: 1,
 		value: config.minOpacity,
@@ -21,6 +34,15 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 		slide: function(event, ui) {
 			options.changeOpacity(ui.value);
 		}
+	});
+	$("#search").keyup(function() {
+		var searchVal = $(this).val().toLowerCase();
+		graph.forEachNode(function(node) { 
+			if (searchVal.length > 1 && node.data.name.toLowerCase().indexOf(searchVal) !== -1)
+				options.showLinked(node,true);
+			else
+				options.showLinked(node,false);
+		});
 	});
 });
 
