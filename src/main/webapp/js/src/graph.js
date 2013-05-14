@@ -5,14 +5,16 @@ define(["jquery","viva","bbq","config","init"], function($,Viva,bbq,config,init)
 	var loadUser = function(username) {
 		$.getJSON(config.path+username, function(data) {
 			config.currentUser = username.toLowerCase();
-			console.log(config.currentUser);
 			init(data);
 		});
 	}
 
 	var changeOpacity = function(opacity) {
 		config.minOpacity = opacity;
-		graph.forEachLink(function(link) { link.ui.attr("opacity", opacity); });
+		graph.forEachLink(function(link) { 
+			if (link.enabled)
+				link.ui.attr("opacity", opacity); 
+		});
 		graph.forEachNode(function(node) { 
 			if (node != config.currentNode)
 				node.ui.attr("opacity", opacity); 
@@ -21,8 +23,17 @@ define(["jquery","viva","bbq","config","init"], function($,Viva,bbq,config,init)
 
 	var filterByMentions = function(threshold) {
 		graph.forEachLink(function(link) {
-			if (link.mentions < threshold)
+			if (link.mentions < threshold) {
+				link.enabled = false;
 				link.ui.attr("opacity", 0);
+			}
+			else {
+				link.enabled = true;
+				link.ui.attr("opacity", config.minOpacity);
+			}
+				//graph.removeLink(link.id);
+
+				//link.ui.attr("opacity", 0);
 		});
 	};
 

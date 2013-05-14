@@ -8,6 +8,8 @@ define(["viva","config"], function(Viva,config) {
 		if (node != config.currentNode)
 			node.ui.attr('opacity', opacity)
 		graph.forEachLinkedNode(node.id, function(node, link){
+			if (!link.enabled)
+				return;
 			link && link.ui && link.ui.attr('opacity', opacity);
 			if (node != config.currentNode)
 				node.ui.attr('opacity', opacity)
@@ -15,6 +17,9 @@ define(["viva","config"], function(Viva,config) {
 	};
 
 	return function(data) {
+		graph.forEachLink(function(link){
+			graph.removeLink(link.id);
+		});
 		graph.forEachNode(function(node){
 			graph.removeNode(node.id);
 		});
@@ -66,6 +71,7 @@ define(["viva","config"], function(Viva,config) {
 			var mentionsPercentile = 1-Math.max(0,config.maxMentions-link.mentions)/config.maxMentions;
 			var colorVal = Math.floor(mentionsPercentile*255);
 			var size = config.maxLinkSize*mentionsPercentile+1;
+			link.enabled = true;
 
 			return Viva.Graph.svg('path')
 				.attr('opacity', config.minOpacity)
