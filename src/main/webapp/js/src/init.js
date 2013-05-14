@@ -3,18 +3,20 @@ define(["viva","config","options"], function(Viva,config,options) {
 	var graphics = config.graphics;
 
 	var showLinked = function(node, isOn) {
-		if (!node.enabled)
+		if (!node.ui.enabled)
 			return;
 		var opacity = isOn ? 1.0 : config.minOpacity;
 
 		if (node != config.currentNode)
 			node.ui.attr('opacity', opacity)
-		graph.forEachLinkedNode(node.id, function(node, link){
-			if (!link.enabled)
+		graph.forEachLinkedNode(node.id, function(linkedNode, link){
+			if (!link.ui.enabled || linkedNode.ui === node.ui)
 				return;
-			link && link.ui && link.ui.attr('opacity', opacity);
-			if (node.enabled && node != config.currentNode)
-				node.ui.attr('opacity', opacity)
+			var incomingMultiplier = (link.fromId !== node.id) ? 0.6 : 1;
+				
+			link && link.ui && link.ui.attr('opacity', incomingMultiplier*opacity);
+			if (linkedNode.ui.enabled && linkedNode != config.currentNode)
+				linkedNode.ui.attr('opacity', incomingMultiplier*opacity)
 		});
 	};
 
@@ -39,10 +41,8 @@ define(["viva","config","options"], function(Viva,config,options) {
 				.attr('opacity', config.minOpacity);
 			var text = Viva.Graph.svg('text')
 				.text(node.data.name)
-				.attr('font-family', config.font)
 				.attr('x',config.nodeSize/2 + 'px')
 				.attr('y',config.nodeSize*1.5 + 'px')
-				.attr('text-anchor','middle');
 			var image = Viva.Graph.svg('image')
 				.attr('width', config.nodeSize)
 				.attr('height', config.nodeSize)
@@ -56,33 +56,44 @@ define(["viva","config","options"], function(Viva,config,options) {
 
 			ui.append(text);
 			ui.append(image);
-			node.enabled = true;
+			ui.enabled = true;
 
-			$(ui).hover(
+			$(image).hover(
 				function() { showLinked(node, true); }, // mouseover
 				function() { showLinked(node, false); } // mouseout
 			);
 			return ui;
 		}).placeNode(function(nodeUI, pos) {
-			nodeUI.attr('transform', 
-				'translate(' + (pos.x-config.nodeSize/2) + ',' + (pos.y-config.nodeSize/2) + ')'
-			);
+			if (nodeUI.enabled)
+				nodeUI.attr('transform', 
+					'translate(' + 
+						(pos.x-config.nodeSize/2) + ',' + 
+						(pos.y-config.nodeSize/2) + 
+					')'
+				);
+			else
+				nodeUI.attr('transform', 'scale(0)');
 		}); 
 
 		graphics.link(function(link){
 			var mentionsPercentile = 1-Math.max(0,config.maxMentions-link.mentions)/config.maxMentions;
 			var colorVal = Math.floor(mentionsPercentile*255);
 			var size = config.maxLinkSize*mentionsPercentile+1;
-			link.enabled = link.mentions > config.minMentions;
 
-			return Viva.Graph.svg('path')
+			var ui = Viva.Graph.svg('path')
 				.attr('opacity', config.minOpacity)
 				.attr('stroke', 'rgb(' + colorVal + ',' + (255-colorVal) + ',' + (255-colorVal) + ')')
 				.attr('stroke-width', size);
+			ui.enabled = link.mentions > config.minMentions;
+			return ui;
 		}).placeLink(function(linkUI, fromPos, toPos) {
-			var data = 'M' + fromPos.x + ',' + fromPos.y + 
-					   'L' + toPos.x + ',' + toPos.y;
-			linkUI.attr('d', data);
+			if (linkUI.enabled) {
+				var data = 'M' + fromPos.x + ',' + fromPos.y + 
+						   'L' + toPos.x + ',' + toPos.y;
+				linkUI.attr('d', data);
+			}
+			else
+				linkUI.attr('d', 'M0,0');
 		});
 
 		var renderer = Viva.Graph.View.renderer(graph, { graphics : graphics });

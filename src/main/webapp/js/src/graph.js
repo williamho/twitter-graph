@@ -36,7 +36,6 @@ define(["jquery","viva","bbq","config","init","options"], function($,Viva,bbq,co
 			}
 			else 
 				loadUser(config.defaultUser);
-
 		});
 
 		$(window).trigger("hashchange");
