@@ -3,12 +3,13 @@ define(["viva"], function(Viva) {
 		path: "json?user=",
 		currentUser: "",
 		currentId: 0,
-		defaultUser: "default",
-		minMentions: 5,
+		defaultUser: "twitter",
+		minMentions: 3,
 		maxMentions: 25,
 		nodeSize: 32,
+		maxLinkSize: 5,
 		font: "Trebuchet MS",
-		minOpacity: 0.1,
+		minOpacity: 0.3,
 
 		graph: Viva.Graph.graph(),
 		graphics: Viva.Graph.View.svgGraphics()

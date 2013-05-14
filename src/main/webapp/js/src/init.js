@@ -24,7 +24,7 @@ define(["viva","config"], function(Viva,config) {
 		}
 
 		data.links.forEach(function(obj, index) {
-			if (obj.weight > 1) 
+			if (obj.weight > config.minMentions)
 				graph.addLink(obj.from, obj.to).mentions = obj.weight;
 		});
 
@@ -64,12 +64,12 @@ define(["viva","config"], function(Viva,config) {
 
 		graphics.link(function(link){
 			var mentionsPercentile = 1-Math.max(0,config.maxMentions-link.mentions)/config.maxMentions;
-			var colorVal = Math.floor((1-mentionsPercentile)*255);
-			var size = 3*mentionsPercentile+1;
+			var colorVal = Math.floor(mentionsPercentile*255);
+			var size = config.maxLinkSize*mentionsPercentile+1;
 
 			return Viva.Graph.svg('path')
 				.attr('opacity', config.minOpacity)
-				.attr('stroke', 'rgb(' + (255-colorVal) + ',' + (colorVal) + ',' + (colorVal) + ')')
+				.attr('stroke', 'rgb(' + colorVal + ',' + (255-colorVal) + ',' + (255-colorVal) + ')')
 				.attr('stroke-width', size);
 		}).placeLink(function(linkUI, fromPos, toPos) {
 			var data = 'M' + fromPos.x + ',' + fromPos.y + 

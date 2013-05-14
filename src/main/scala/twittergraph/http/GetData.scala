@@ -19,7 +19,7 @@ class GetData extends HttpServlet {
     val username = Option(req getParameter "user").getOrElse("default").toLowerCase
 
     val pathToJson = "output/" + username + ".json"
-    if (!(new File(pathToJson).isFile())) {
+    if (!(new File(pathToJson).isFile)) {
       val localJobOutput = "/tmp/twittergraph-" + username
       TwitterGraph.deleteHdfsFile(hdfsOutDir)
       
