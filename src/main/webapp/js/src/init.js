@@ -12,7 +12,7 @@ define(["viva","config","options"], function(Viva,config,options) {
 		graph.forEachLinkedNode(node.id, function(linkedNode, link){
 			if (!link.ui.enabled || linkedNode.ui === node.ui)
 				return;
-			var incomingMultiplier = (link.fromId !== node.id) ? 0.6 : 1;
+			var incomingMultiplier = (link.fromId !== node.id) ? config.incomingMultiplier : 1;
 				
 			link && link.ui && link.ui.attr('opacity', incomingMultiplier*opacity);
 			if (linkedNode.ui.enabled && linkedNode != config.currentNode)
@@ -21,15 +21,12 @@ define(["viva","config","options"], function(Viva,config,options) {
 	};
 
 	return function(data) {
-		graph.forEachLink(function(link){
-			graph.removeLink(link.id);
-		});
-		graph.forEachNode(function(node){
-			graph.removeNode(node.id);
-		});
-
+		graph.clear();
+		graph.beginUpdate();
+		graph.users = {};
 		for (var id in data.users) {
 			graph.addNode(id, data.users[id]);
+			graph.users[data.users[id].name.toLowerCase()] = id; // Map usernames to IDs
 		}
 
 		data.links.forEach(function(obj, index) {
@@ -96,11 +93,8 @@ define(["viva","config","options"], function(Viva,config,options) {
 				linkUI.attr('d', 'M0,0');
 		});
 
-		var renderer = Viva.Graph.View.renderer(graph, { 
-			container: document.getElementById('content'),
-			graphics: graphics 
-		});
-		renderer.run();
+		graph.endUpdate();
+		config.renderer.run();
 		options.filterByMentions(config.minMentions);
 	}
 });

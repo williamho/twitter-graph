@@ -17,5 +17,5 @@ require.config({
 	}
 });
 
-requirejs(["graph"]);
+define(["graph","menu"], function() {});
 

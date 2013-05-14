@@ -1,4 +1,10 @@
 define(["viva"], function(Viva) {
+	var graph = Viva.Graph.graph();
+	var graphics = Viva.Graph.View.svgGraphics();
+	var renderer = Viva.Graph.View.renderer(graph, { 
+		container: document.getElementById('content'),
+		graphics: graphics 
+	});
 	var config = {
 		path: "json?user=",
 		currentUser: "",
@@ -8,12 +14,13 @@ define(["viva"], function(Viva) {
 		maxMentions: 50,
 		nodeSize: 32,
 		maxLinkSize: 5,
-		font: "Trebuchet MS",
 		minOpacity: 0.3,
+		incomingMultiplier: 0.6,
 		prune: false,
 
-		graph: Viva.Graph.graph(),
-		graphics: Viva.Graph.View.svgGraphics()
+		graph: graph,
+		graphics: graphics,
+		renderer: renderer,
 	};
 	return config;
 });

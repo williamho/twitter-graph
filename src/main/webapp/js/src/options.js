@@ -1,9 +1,14 @@
-define(["config"], function(config) {
+define(["jquery","bbq","config"], function($,bbq,config) {
 	var graph = config.graph;
 	var graphics = config.graphics;
 
+	var updateURL = function(property) {
+		window.location = $.param.fragment(window.location.href, property);
+	}
+
 	return {
 		changeOpacity: function(opacity) {
+			graph.beginUpdate();
 			config.minOpacity = opacity;
 			graph.forEachLink(function(link) { 
 				if (link.ui.enabled)
@@ -13,9 +18,14 @@ define(["config"], function(config) {
 				if (node != config.currentNode)
 					node.ui.attr("opacity", opacity); 
 			});
+			updateURL({opacity: opacity});
+			$("#opacity").html(opacity);
+			graph.endUpdate();
 		},
 
 		filterByMentions: function(threshold) {
+			graph.beginUpdate();
+			config.minMentions = threshold;
 			graph.forEachLink(function(link) {
 				link.ui.enabled = (link.mentions >= threshold);
 				//link.ui && link.ui.attr("opacity", link.ui.enabled ? config.minOpacity : 0);
@@ -35,6 +45,10 @@ define(["config"], function(config) {
 				if (config.prune && !node.ui.enabled) 
 					graph.removeNode(node.id);
 			});
+			updateURL({mentions: threshold});
+			$("#mentions").html("&#8805;" + threshold);
+			graph.endUpdate();
+			config.renderer.rerender();
 		}
 	}
 });
