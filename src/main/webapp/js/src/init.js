@@ -1,8 +1,10 @@
-define(["viva","config"], function(Viva,config) {
+define(["viva","config","options"], function(Viva,config,options) {
 	var graph = config.graph;
 	var graphics = config.graphics;
 
 	var showLinked = function(node, isOn) {
+		if (!node.enabled)
+			return;
 		var opacity = isOn ? 1.0 : config.minOpacity;
 
 		if (node != config.currentNode)
@@ -11,7 +13,7 @@ define(["viva","config"], function(Viva,config) {
 			if (!link.enabled)
 				return;
 			link && link.ui && link.ui.attr('opacity', opacity);
-			if (node != config.currentNode)
+			if (node.enabled && node != config.currentNode)
 				node.ui.attr('opacity', opacity)
 		});
 	};
@@ -29,8 +31,7 @@ define(["viva","config"], function(Viva,config) {
 		}
 
 		data.links.forEach(function(obj, index) {
-			if (obj.weight > config.minMentions)
-				graph.addLink(obj.from, obj.to).mentions = obj.weight;
+			graph.addLink(obj.from, obj.to).mentions = obj.weight;
 		});
 
 		graphics.node(function(node) {
@@ -55,6 +56,7 @@ define(["viva","config"], function(Viva,config) {
 
 			ui.append(text);
 			ui.append(image);
+			node.enabled = true;
 
 			$(ui).hover(
 				function() { showLinked(node, true); }, // mouseover
@@ -71,7 +73,7 @@ define(["viva","config"], function(Viva,config) {
 			var mentionsPercentile = 1-Math.max(0,config.maxMentions-link.mentions)/config.maxMentions;
 			var colorVal = Math.floor(mentionsPercentile*255);
 			var size = config.maxLinkSize*mentionsPercentile+1;
-			link.enabled = true;
+			link.enabled = link.mentions > config.minMentions;
 
 			return Viva.Graph.svg('path')
 				.attr('opacity', config.minOpacity)
@@ -85,5 +87,6 @@ define(["viva","config"], function(Viva,config) {
 
 		var renderer = Viva.Graph.View.renderer(graph, { graphics : graphics });
 		renderer.run();
+		options.filterByMentions(config.minMentions);
 	}
 });

@@ -1,4 +1,4 @@
-define(["jquery","viva","bbq","config","init"], function($,Viva,bbq,config,init) {
+define(["jquery","viva","bbq","config","init","options"], function($,Viva,bbq,config,init,options) {
 	var graph = config.graph;
 	var graphics = config.graphics;
 
@@ -9,37 +9,25 @@ define(["jquery","viva","bbq","config","init"], function($,Viva,bbq,config,init)
 		});
 	}
 
-	var changeOpacity = function(opacity) {
-		config.minOpacity = opacity;
-		graph.forEachLink(function(link) { 
-			if (link.enabled)
-				link.ui.attr("opacity", opacity); 
-		});
-		graph.forEachNode(function(node) { 
-			if (node != config.currentNode)
-				node.ui.attr("opacity", opacity); 
-		});
-	};
-
-	var filterByMentions = function(threshold) {
-		graph.forEachLink(function(link) {
-			if (link.mentions < threshold) {
-				link.enabled = false;
-				link.ui.attr("opacity", 0);
-			}
-			else {
-				link.enabled = true;
-				link.ui.attr("opacity", config.minOpacity);
-			}
-				//graph.removeLink(link.id);
-
-				//link.ui.attr("opacity", 0);
-		});
-	};
-
 	$(function(){
 		$(window).bind("hashchange", function(e) {
 			var params = $.deparam.fragment();
+
+			// Global minOpacity
+			config.prune = params.hasOwnProperty("prune");
+
+			// Switch mentions threshold
+			if (params.hasOwnProperty("mentions")) {
+				var mentions = parseInt(params.mentions);
+				if (mentions != config.minMentions){ 
+					config.minMentions = mentions;
+					options.filterByMentions(config.minMentions);
+				}
+			}
+
+			// Global minOpacity
+			if (params.hasOwnProperty("opacity")) 
+				options.changeOpacity(parseFloat(params.opacity));
 
 			// Switch user
 			if (params.hasOwnProperty("user")) {
@@ -49,21 +37,8 @@ define(["jquery","viva","bbq","config","init"], function($,Viva,bbq,config,init)
 			else 
 				loadUser(config.defaultUser);
 
-			// Switch mentions threshold
-			if (params.hasOwnProperty("mentions")) {
-				var mentions = parseInt(params.mentions);
-				if (mentions != config.minMentions){ 
-					config.minMentions = mentions;
-					filterByMentions(config.minMentions);
-				}
-			}
-
-			if (params.hasOwnProperty("opacity")) {
-				changeOpacity(parseFloat(params.opacity));
-			}
 		});
 
 		$(window).trigger("hashchange");
 	});
-
 });

@@ -5,11 +5,12 @@ define(["viva"], function(Viva) {
 		currentId: 0,
 		defaultUser: "twitter",
 		minMentions: 3,
-		maxMentions: 25,
+		maxMentions: 50,
 		nodeSize: 32,
 		maxLinkSize: 5,
 		font: "Trebuchet MS",
 		minOpacity: 0.3,
+		prune: false,
 
 		graph: Viva.Graph.graph(),
 		graphics: Viva.Graph.View.svgGraphics()
