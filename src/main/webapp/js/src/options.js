@@ -32,9 +32,13 @@ define(["jquery","bbq","config"], function($,bbq,config) {
 		},
 
 		listLinked: function() {
-			var linkedDiv = function(image, text) {
-				return "<div style='background-image: url(" + image +")'><span>" 
-					+ text + "</span></div>";
+			var linkedDiv = function(image, text, mentions) {
+				var opacity = (typeof mentions === 'undefined') ? 
+					1 : Math.max(0.3,Math.min(1,mentions/config.maxMentions));
+
+				return "<div style='background-image: url(" + image +"); " 
+					+ "opacity: " + opacity + "'>" 
+					+ "<span>" + text + "</span></div>";
 			}
 
 			var element;
@@ -47,7 +51,7 @@ define(["jquery","bbq","config"], function($,bbq,config) {
 					return;
 
 				element = (link.fromId === config.selectedNode.id) ? outgoing : incoming;
-				element.append(linkedDiv(linkedNode.data.icon, link.mentions));
+				element.append(linkedDiv(linkedNode.data.icon, link.mentions, link.mentions));
 			});
 
 		},

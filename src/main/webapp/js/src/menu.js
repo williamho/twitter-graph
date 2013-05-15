@@ -9,6 +9,10 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 			config.renderer.resume();
 	}
 
+	$(document).tooltip({
+		show: false
+	});
+
 	$("#menu").draggable();
 	$(document).mouseup(function() {
 		pause(config.paused);
@@ -19,6 +23,7 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 	$("#prune").change(function() {
 		config.prune = this.checked;
 		options.filterByMentions(config.minMentions);
+		pause(config.paused);
 	});
 	$("#mentions-slider").slider({
 		min: 0,
