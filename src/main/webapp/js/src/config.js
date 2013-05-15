@@ -18,6 +18,7 @@ define(["viva"], function(Viva) {
 		incomingMultiplier: 0.6,
 		prune: false,
 		paused: false,
+		selectedNode: null,
 
 		graph: graph,
 		graphics: graphics,

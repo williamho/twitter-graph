@@ -30,7 +30,6 @@ define(["viva","config","options"], function(Viva,config,options) {
 				text.attr('font-weight','bold');
 				ui.attr('opacity', 1);
 			}
-			node.isSelected = false;
 			ui.append(text);
 			ui.append(image);
 			ui.enabled = true;
