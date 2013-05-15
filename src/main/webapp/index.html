@@ -8,20 +8,24 @@
 </head>
 <body>
 <div id="content"></div>
-<div id="menu" class="ui-widget-content">
-<p>Search: <br/>
-<input id="search"></input>
-</p>
+<div id="menu" class="ui-widget-content ui-corner-all">
+	<p>Search: <br/>
+	<input id="search"></input>
+	</p>
 
-<p>Pause: 
-<input type="checkbox" id="pause" />
-</p>
+	<p> <input type="checkbox" id="pause" /> Pause </p>
+	<p> <input type="checkbox" id="prune" /> Prune </p>
 
-<p>Mentions: <span id="mentions" class="value">&nbsp;</span></p>
-<div id="mentions-slider"></div>
+	<p>Mentions: <span id="mentions" class="value">&nbsp;</span></p>
+	<div id="mentions-slider"></div>
 
-<p>Opacity: <span id="opacity" class="value">&nbsp;</span></p>
-<div id="opacity-slider"></div>
+	<p>Opacity: <span id="opacity" class="value">&nbsp;</span></p>
+	<div id="opacity-slider"></div>
+</div>
+
+<div id="interactions">
+	<div id="incoming"></div>
+	<div id="outgoing"></div>
 </div>
 </body>
 </html>

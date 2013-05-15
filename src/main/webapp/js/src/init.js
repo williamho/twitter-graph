@@ -36,7 +36,7 @@ define(["viva","config","options"], function(Viva,config,options) {
 
 			$(image).hover(
 				function() { options.showLinked(node, true); }, // mouseover
-				function() { options.showLinked(node, false); } // mouseout
+				function() { } // mouseout
 			);
 			return ui;
 		}).placeNode(function(nodeUI, pos) {

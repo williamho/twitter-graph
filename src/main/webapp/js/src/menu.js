@@ -9,12 +9,16 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 			config.renderer.resume();
 	}
 
-	$("#menu").draggable().resizable();
+	$("#menu").draggable();
 	$(document).mouseup(function() {
 		pause(config.paused);
 	});
 	$("#pause").change(function() {
 		pause(config.paused = this.checked);
+	});
+	$("#prune").change(function() {
+		config.prune = this.checked;
+		options.filterByMentions(config.minMentions);
 	});
 	$("#mentions-slider").slider({
 		min: 0,
@@ -48,9 +52,8 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 	});
 	*/
 	var selectItem = function(event, ui) {
-		options.changeOpacity();
 		options.showLinked(ui.item.node,true);
-	}
+	};
 	$("#search").autocomplete({
 		minLength: 1,
 		autoFocus: true,
@@ -71,7 +74,7 @@ define(["jquery","ui","config","options","graph"], function($,ui,config,options,
 			return callback(results);
 		},
 		select: selectItem,
-		focus: selectItem,
+		focus: selectItem
 	})
 	.data("ui-autocomplete")._renderItem = function(ul, item) {
 		return $("<li>")

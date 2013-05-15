@@ -8,25 +8,48 @@ define(["jquery","bbq","config"], function($,bbq,config) {
 
 	return {
 		showLinked: function(node, isOn) {
+			if (!node.ui.enabled) return;
 			if (config.selectedNode && node !== config.selectedNode) { // Deselect current node
 				this.showLinked(config.selectedNode, false);
 			}
-			if (!node.ui.enabled) return;
+			config.selectedNode = isOn ? node : null;
 			var opacity = isOn ? 1.0 : config.minOpacity;
 
+			var directionalMultiplier;
 			graph.forEachLinkedNode(node.id, function(linkedNode, link){
 				if (!link.ui.enabled || linkedNode.ui === node.ui) return;
-				var opacity = isOn ? 1.0 : config.minOpacity;
 
-				var incomingMultiplier = (link.fromId !== node.id) ? config.incomingMultiplier : 1;
+				directionalMultiplier = link.fromId === node.id ? 1 : config.incomingMultiplier;
 					
-				link.ui && link.ui.attr('opacity', incomingMultiplier*opacity);
+				link.ui && link.ui.attr('opacity', directionalMultiplier*opacity);
 				if (linkedNode.ui.enabled && linkedNode != config.currentNode)
-					linkedNode.ui.attr('opacity', incomingMultiplier*opacity)
+					linkedNode.ui.attr('opacity', directionalMultiplier*opacity)
 			});
 			if (node != config.currentNode) // currentNode should always be opaque
 				node.ui.attr('opacity', opacity)
 			config.selectedNode = node;
+			this.listLinked();
+		},
+
+		listLinked: function() {
+			var linkedDiv = function(image, text) {
+				return "<div style='background-image: url(" + image +")'><span>" 
+					+ text + "</span></div>";
+			}
+
+			var element;
+			var nodeIcon = config.selectedNode.data.icon;
+			var outgoing = $("#outgoing").html(linkedDiv(nodeIcon,"&#8658;"));
+			var incoming = $("#incoming").html(linkedDiv(nodeIcon,"&#8656;"));
+
+			graph.forEachLinkedNode(config.selectedNode.id, function(linkedNode, link) {
+				if (link.mentions < config.minMentions || linkedNode === config.selectedNode)
+					return;
+
+				element = (link.fromId === config.selectedNode.id) ? outgoing : incoming;
+				element.append(linkedDiv(linkedNode.data.icon, link.mentions));
+			});
+
 		},
 
 		changeOpacity: function(opacity) {
