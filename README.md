@@ -1,19 +1,20 @@
 TwitterGraph
 ============
 
+![TwitterGraph for @twitter](twittergraph.png)
+
 TwitterGraph is an application that graphs interactions between a Twitter user's 
 friends (who they are following), where interactions are defined by incoming or 
 outgoing mentions.
 
-![TwitterGraph for @twitter](twittergraph.png)
-
 The application uses [Twitter4j][1] to fetch the data, [Hadoop][2] 
 (with [Scalding][3]) to filter the data, and [VivaGraphJS][4] to display an 
-interactive SVG graph of the data.
+interactive SVG graph of the data. A demo of the frontend interface can be
+found [here](http://ee.walfas.org/twittergraph).
 
-#Usage
+##Usage
 
-##Setup
+###Setup
 
 Modify `src/main/scala/twittergraph/TwitterOAuth.scala` to include your Twitter 
 OAuth keys, then use sbt to create the jar file and start the jetty server.
@@ -23,10 +24,10 @@ OAuth keys, then use sbt to create the jar file and start the jetty server.
 	container:start
 
 If successful, point your browser at `localhost:8080` to see the default graph 
-of @[twitter](twitter.com/twitter)'s interactions (based on the provided 
+of @[twitter](http://twitter.com/twitter)'s interactions (based on the provided 
 `output/twitter.json`).
 
-##Run
+###Run
 
 To generate a graph for a particular user, point a browser at:
 
@@ -42,7 +43,13 @@ for 15 minutes and retry when more API calls are available. Depending on your
 Hadoop configurations, the job may actually time out and fail, but the data is 
 stored in HBase so you can just re-run the job later (possibly several times).
 
-#Details
+After the JSON file has been created, view the user's graph at:
+
+	localhost:8080/?user=username
+
+Options are available to change opacity, filter by mentions, etc.
+
+##Details
 
 Pseudocode, given a user named `user` and a default cache period of 3 days:
 
