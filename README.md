@@ -7,12 +7,14 @@ TwitterGraph is an application that graphs interactions between a Twitter user's
 friends (who they are following), where interactions are defined by incoming or 
 outgoing mentions.
 
-The application uses [Twitter4j][1] to fetch the data, [Hadoop][2] 
-(with [Scalding][3]) to filter the data, and [VivaGraphJS][4] to display an 
-interactive SVG graph of the data. A demo of the frontend interface can be
-found [here](http://ee.walfas.org/twittergraph).
+The application uses [Twitter4j][1] to fetch the data, [HBase][2] to store the 
+data, [Hadoop][3] (with [Scalding][4]) to filter the data, and [VivaGraphJS][5] 
+to display an interactive SVG graph of the data. A demo of the frontend interface 
+can be found [here](http://ee.walfas.org/twittergraph).
 
 ##Usage
+
+The following assumes that Hadoop, HBase, and sbt are available.
 
 ###Setup
 
@@ -67,7 +69,8 @@ Pseudocode, given a user named `user` and a default cache period of 3 days:
 
 <!--Footnotes-->
 [1]: http://twitter4j.org/en
-[2]: http://hadoop.apache.org/
-[3]: https://github.com/twitter/scalding
-[4]: https://github.com/anvaka/VivaGraphJS
+[2]: http://hbase.apache.org/
+[3]: http://hadoop.apache.org/
+[4]: https://github.com/twitter/scalding
+[5]: https://github.com/anvaka/VivaGraphJS
 
